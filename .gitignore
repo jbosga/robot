@@ -1,6 +1,7 @@
 __pycache__
 .ipynb_checkpoints
 .vscode
-models
+
 venv_robot
-models/*/
+models/ssd_mobilenet_v2*/
+models/ssd_mobilenet_v3*/
