@@ -1,0 +1,14 @@
+name: robot
+channels:
+  - anaconda-fusion
+  - defaults
+dependencies:
+  - opencv
+  - pylint
+  - python=3.7.0
+  - tensorflow
+  - protobuf
+  - pandas
+  - jupyter
+  - autopep8
+
