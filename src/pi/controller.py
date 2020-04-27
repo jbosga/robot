@@ -7,26 +7,38 @@ class Controller(object):
 
     def __init__(self, serial_port):
         self.ser = serial.Serial(serial_port, 9600, timeout=1)
-        self.valid_moves = [ 'F', 'B', 'R', 'L', 'S']
+        self.valid_commands = [ 'F', 'B', 'R', 'L', 'S', 'P']
         self.min_safe_dist = 40
         self.steps_since_dist_check = 0
 
-    def move(self, direction):
-        if direction in self.valid_moves:
-            if direction == 'F':
-                dist_to_obj = self.read_sonar()
-                if 0 < dist_to_obj < self.min_safe_dist:
-                    direction = random.choice(['B', 'R', 'L'])
+    def act(self, command, duration_s=None):
+        """Passes commands to the Arduino microcontroller. It keeps retrying until the command
+        is confirmed by the Arduino. Also allows for a command duration, useful for navigation commands."""
+        command_given = False
 
+        if command not in self.valid_commands:
+            raise(ValueError(f"Command not valid: {command}"))
+        
+        cmd = command + "\n"
+        i = 0
+        while not command_given:
             self.ser.flush()
-            move_cmd = direction + "\n"
-            self.ser.write(move_cmd.encode('utf-8'))
+            self.ser.write(cmd.encode('utf-8'))
             line = self.ser.readline().decode('utf-8').rstrip()
-            print(f"Serial feedback: {line}")
-            self.steps_since_dist_check += 1
-            return 1
+            if line == f'Received: {command}':
+                command_given = True
+                print(f"{command}: {i}")
+            i += 1 
+
+        if duration_s:
+            print(f"Sleeping for {duration_s} s")
+            time.sleep(duration_s)
+
+        if command == 'P':
+            dist = self.read_sonar()
+            return dist
         else:
-            return 0
+            return 1
 
 
     def dist_check(self):
@@ -41,6 +53,8 @@ class Controller(object):
         pass
 
     def read_sonar(self):
+        """Listens to Arduino serial output for sonar returns. 
+        It collects 5 sonar pings before returning the average reported distance in centimeters. """
         received_ping = False
         pings=[]
         dist_cm = -1
@@ -50,7 +64,7 @@ class Controller(object):
                 try:
                     self.ser.flush()
                     line = self.ser.readline().decode('utf-8').rstrip()
-                    if re.match('^Ping: \d{1,3}$', line):
+                    if re.match(r'^Ping: \d{1,3}$', line):
                         dist_cm = float(line.split(' ')[-1])
                         if dist_cm == 0:
                             dist_cm = 250
@@ -62,9 +76,21 @@ class Controller(object):
             pings.append(dist_cm)
             received_ping = False
             dist_cm = None
-
         return sum(pings)/len(pings)
 
 
     def look_direction(self, degrees):
         pass
+
+
+    def simple_navigation(self):
+        while True:
+            self.act('F', duration_s=2)
+
+            self.act('S', duration_s=0.1)
+
+            dist = self.act('P', duration_s=None)
+            print(f"Ping: {dist} cm")
+            if 0 < dist < self.min_safe_dist:
+                self.act('L', duration_s=1)
+
