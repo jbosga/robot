@@ -35,20 +35,20 @@ void setup() {
 
 void loop() {
 
-  pingSonar();
-  recvInfo();
-  Move();
+  getCommand();
+  Act();
   
 }
 
 void pingSonar() {
-  unsigned int uS = sonar.ping(); // Send ping, get ping time in microseconds (uS). Pings every 500ms, as per the delay set in the loop below. 29ms should be the shortest ping delay.
-  Serial.print("Ping: ");
-  unsigned int distance_cm = uS / US_ROUNDTRIP_CM; // Convert ping time to distance in cm and print result (0 = outside set distance range)
-  Serial.println(distance_cm); // Convert ping time to distance in cm and print result (0 = outside set distance range)
+
+    unsigned int uS = sonar.ping(); // Send ping, get ping time in microseconds (uS). Pings every 500ms, as per the delay set in the loop below. 29ms should be the shortest ping delay.
+    Serial.print("Ping: ");
+    unsigned int distance_cm = uS / US_ROUNDTRIP_CM; // Convert ping time to distance in cm and print result (0 = outside set distance range)
+    Serial.println(distance_cm); // Convert ping time to distance in cm and print result (0 = outside set distance range)
 }
 
-void recvInfo() {
+void getCommand() {
 
   if (Serial.available() > 0) {
 
@@ -60,9 +60,13 @@ void recvInfo() {
   
 }
 
-void Move() {
+void Act() {
 
   while(newData == true) {
+
+    if (receivedChar == 'P'){
+      pingSonar();
+    }
 
     if (receivedChar == 'F'){
       // Drive forward
