@@ -2,7 +2,6 @@ import numpy as np
 import tensorflow as tf
 import cv2 as cv
 import os
-import json
 
 # Text printing settings
 font = cv.FONT_HERSHEY_SIMPLEX
@@ -45,12 +44,14 @@ with tf.compat.v1.Session() as sess:
 
         # Visualize detected bounding boxes.
         num_detections = int(out[0][0])
+        labels_dict = dict()
         for i in range(num_detections):
             classId = int(out[3][0][i])
             label = labels[str(classId)]
             score = float(out[1][0][i])
             bbox = [float(v) for v in out[2][0][i]]
             if score > 0.3:
+                labels_dict[label] = score
                 x = bbox[1] * cols
                 y = bbox[0] * rows
                 right = bbox[3] * cols
@@ -64,10 +65,10 @@ with tf.compat.v1.Session() as sess:
                             2)
                 cv.rectangle(img, (int(x), int(y)), (int(right),
                                                     int(bottom)), (125, 255, 51), thickness=2)
-
-        cv.imshow('TensorFlow MobileNet-SSD', img)
-        if cv.waitKey(1) & 0xFF == ord('q'):
-            break
+        print(labels_dict)
+        # cv.imshow('TensorFlow MobileNet-SSD', img)
+        # if cv.waitKey(1) & 0xFF == ord('q'):
+        #     break
 # When everything done, release the capture
 cap.release()
 cv.destroyAllWindows()

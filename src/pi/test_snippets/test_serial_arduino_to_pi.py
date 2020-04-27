@@ -1,6 +1,6 @@
 import serial
 
-ser = serial.Serial('COM3',9600)
+ser = serial.Serial('/dev/ttyACM1',9600)
 s = [0]
 while True:
 	read_serial=ser.readline()
