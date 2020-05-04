@@ -1,6 +1,6 @@
-// NewPing - Version: Latest 
+// Include libraries
 #include <NewPing.h>
-
+#include <Servo.h>
 
 // SENSORS
 #define TRIGGER_PIN  7  // Arduino pin tied to trigger pin on the ultrasonic sensor.
@@ -11,6 +11,7 @@ int min_safe_dist_cm = 35; // Maximum range needed
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // Creating the NewPing Object.
 
 //ACTUATORS
+
 //L293D
 //Motor A
 const int motorPin1  = 5;  // Pin 14 of L293
@@ -21,6 +22,12 @@ const int motorPin4  = 11;  // Pin  2 of L293
 //Enable pin (controls both motors)
 const int motorEnablePin = 3;
 
+// Servo
+int servoPin = 2;
+String degreesStr = "";
+unsigned int degrees = 60;
+// Create a servo object 
+Servo Servo1; 
 
 char receivedChar;
 char command = 'S';
@@ -33,7 +40,8 @@ boolean newData = false;
 void setup() {
 
   Serial.begin(9600);
-
+  Servo1.attach(servoPin); 
+  Servo1.write(degrees);
   //Set pins as outputs
   pinMode(motorPin1, OUTPUT);
   pinMode(motorPin2, OUTPUT);
@@ -63,22 +71,27 @@ void getCommand() {
   if (Serial.available() > 0) {
 
     receivedChar = Serial.read();
-    Serial.print("Received: ");
-    Serial.println(receivedChar);
-    if ((receivedChar != lastReceivedCommand)&&(receivedChar=='S' || receivedChar=='Q' || receivedChar=='M')){
+    // Serial.print("Received: ");
+    // Serial.println(receivedChar);
+    if ((receivedChar != lastReceivedCommand)&&(receivedChar=='S' || receivedChar=='Q' || receivedChar=='M' || receivedChar =='L')){
       command = receivedChar;
       
       lastReceivedCommand = command;
     }
     if (receivedChar=='M'){
       receivedChar = Serial.read();
-      Serial.print("Received: ");
-      Serial.println(receivedChar);
       speed = receivedChar - '0';
-      Serial.println(speed);
-
       speed = (255 / 10) * speed;
-      Serial.println(speed);
+    }
+    if (receivedChar=='L'){
+      degrees = 201;
+      while(degrees > 200){
+        receivedChar = Serial.read();
+        degrees = receivedChar - '0';
+        degrees = degrees * 18;
+        Serial.print("Degrees:");
+        Serial.println(degrees);
+      }
     }
   }
   
@@ -94,6 +107,9 @@ void Move() {
   }
   if(command=='M'){
       basicMove();
+  }
+  if(command=='L'){
+    Servo1.write(degrees);
   }
 }
 
