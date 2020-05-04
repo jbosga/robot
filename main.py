@@ -10,13 +10,13 @@ from src.pi.controller import Controller
 # cap = cv.VideoCapture(0)
 
 # detector = ObjectDetector(conf_thresh=0.3)
-# RPI Serial port: '/dev/ttyACM0'
+# Linux Serial port: '/dev/ttyACM0'
 # Windows Serial Port: 'COM3'
-controller = Controller(serial_port='COM3')
+controller = Controller(serial_port='/dev/ttyACM0')
 
 moves = ['F', 'S', 'P', 'F', 'S', 'P']
 
 if __name__ == '__main__':
 
-    controller.simple_navigation()
-    
+    controller.act('M6', duration_s=15)
+    controller.act('S0')

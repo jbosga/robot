@@ -7,7 +7,6 @@ class Controller(object):
 
     def __init__(self, serial_port):
         self.ser = serial.Serial(serial_port, 9600, timeout=1)
-        self.valid_commands = [ 'F', 'B', 'R', 'L', 'S', 'P']
         self.min_safe_dist = 40
         self.steps_since_dist_check = 0
 
@@ -16,19 +15,22 @@ class Controller(object):
         is confirmed by the Arduino. Also allows for a command duration, useful for navigation commands."""
         command_given = False
 
-        if command not in self.valid_commands:
-            raise(ValueError(f"Command not valid: {command}"))
         
         cmd = command + "\n"
         i = 0
         while not command_given:
-            self.ser.flush()
-            self.ser.write(cmd.encode('utf-8'))
-            line = self.ser.readline().decode('utf-8').rstrip()
-            if line == f'Received: {command}':
-                command_given = True
-                print(f"{command}: {i}")
+            try:
+                self.ser.flush()
+                self.ser.write(cmd.encode('utf-8'))
+                line = self.ser.readline().decode('utf-8').rstrip()
+                print(line)
+                if line == f'Received: {command[0]}':
+                    command_given = True
+                    print(f"{command}: {i}")
+            except UnicodeDecodeError as u:
+                print(f"Error: {u}")
             i += 1 
+            # print(i)
 
         if duration_s:
             print(f"Sleeping for {duration_s} s")
