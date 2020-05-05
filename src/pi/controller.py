@@ -23,7 +23,7 @@ class Controller(object):
                 self.ser.flush()
                 self.ser.write(cmd.encode('utf-8'))
                 line = self.ser.readline().decode('utf-8').rstrip()
-                print(line)
+                # print(line)
                 if line == f'Received: {command[0]}':
                     command_given = True
                     print(f"{command}: {i}")
