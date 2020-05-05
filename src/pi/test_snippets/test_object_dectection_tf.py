@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import cv2 as cv
 import os
+import json
 
 # Text printing settings
 font = cv.FONT_HERSHEY_SIMPLEX
@@ -19,7 +20,7 @@ with tf.compat.v1.gfile.FastGFile('models/ssd_mobilenet_v1_coco_2017_11_17/froze
     graph_def.ParseFromString(f.read())
 
 
-cap = cv.VideoCapture(0)
+cap = cv.VideoCapture(2)
 
 with tf.compat.v1.Session() as sess:
     # Restore session
