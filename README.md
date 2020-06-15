@@ -2,9 +2,6 @@
 
 This repo contains code for a small robot I built. It is called Rob. 
 
-![Image of Rob](https://github.com/jbosga/robot/tree/master/data/images/IMG5939.JPG)
-
-
 Right now, it can move around without bumping into too many things, and it can pretty accurately detect 
 potted plants. 
 
@@ -25,3 +22,7 @@ Still to do:
 - Camera pan/tilt
 - SLAM or some other form of localization (GPS for outside navigation?)
 - Text-to-speech so Rob can tell me fun facts about the potted plants it finds
+
+
+![Image of Rob](https://github.com/jbosga/robot/blob/master/data/images/IMG_5939.JPG)
+
