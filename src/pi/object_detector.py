@@ -8,6 +8,15 @@ from pathlib import Path
 class ObjectDetector(object):
 
     def __init__(self, labels_path='data/80_coco_labels.json', model_path='models/ssd_mobilenet_v1_coco_2017_11_17/frozen_inference_graph.pb', conf_thresh=0.3):
+        """Initializes the Object Detector object by starting a Tensorflow session with a pretrained model.
+
+        :param labels_path: path to data labels, defaults to 'data/80_coco_labels.json'
+        :type labels_path: str, optional
+        :param model_path: path to pretrained model, defaults to 'models/ssd_mobilenet_v1_coco_2017_11_17/frozen_inference_graph.pb'
+        :type model_path: str, optional
+        :param conf_thresh: confidence threshold for predictions, defaults to 0.3
+        :type conf_thresh: float, optional
+        """
         labels_path = Path.cwd() / Path(labels_path)
         
         with labels_path.open() as f:
@@ -25,6 +34,13 @@ class ObjectDetector(object):
         self.conf_thresh = conf_thresh
 
     def detect(self, img):
+        """Detects objects (labels + bounding boxes) on a still frame. 
+
+        :param img: image to detect stuff on
+        :type img: array
+        :return: list of detections, where each detection is a dictionary containing a label, confidence, and bounding box coordinates
+        :rtype: list
+        """
             rows = img.shape[0]
             cols = img.shape[1]
             inp = cv.resize(img, (300, 300))

@@ -3,19 +3,36 @@ import time
 import random
 import re
 
+
 class Controller(object):
 
     def __init__(self, serial_port):
+        """Initializes the Controller object.
+
+        :param serial_port: The port the Arduino is connected to. 
+        :type serial_port: str
+        """
         self.ser = serial.Serial(serial_port, 9600, timeout=1)
         self.min_safe_dist = 40
         self.steps_since_dist_check = 0
 
     def act(self, command, duration_s=None):
         """Passes commands to the Arduino microcontroller. It keeps retrying until the command
-        is confirmed by the Arduino. Also allows for a command duration, useful for navigation commands."""
+        is confirmed by the Arduino. Also allows for a command duration, useful for navigation commands.
+        Valid commands:
+            M0-9 - Move at speed 
+            S0   - Stop
+            L0-9 - Look around. Value is mapped to 180 degree FOV where 90 is forward facing. 0=0 degrees, 9=180 degrees.
+
+        :param command: Valid command in the form of a capital character followed by a power parameter between 0 and 9. 
+        :type command: str
+        :param duration_s: Desired duration of the command in seconds, defaults to None
+        :type duration_s: int, optional
+        :return: 1 upon successful exection, or dist if a sonar measurement action was taken. 
+        :rtype: float
+        """
         command_given = False
 
-        
         cmd = command + "\n"
         i = 0
         while not command_given:
@@ -29,7 +46,7 @@ class Controller(object):
                     print(f"{command}: {i}")
             except UnicodeDecodeError as u:
                 print(f"Error: {u}")
-            i += 1 
+            i += 1
             # print(i)
 
         if duration_s:
@@ -42,26 +59,18 @@ class Controller(object):
         else:
             return 1
 
-
-    def dist_check(self):
-        # wiggle wiggle
-
-        # move a little left
-        # measure sonar
-        # move a little right
-        # measure sonar
-        # sort of center
-        # take in
-        pass
-
     def read_sonar(self):
         """Listens to Arduino serial output for sonar returns. 
-        It collects 5 sonar pings before returning the average reported distance in centimeters. """
+        It collects 5 sonar pings before returning the average reported distance in centimeters.
+
+        :return: Average distance in centimeters over 5 sonar measurements
+        :rtype: float
+        """
         received_ping = False
-        pings=[]
+        pings = []
         dist_cm = -1
         i = 0
-        while i<5:
+        while i < 5:
             while not received_ping:
                 try:
                     self.ser.flush()
@@ -71,28 +80,14 @@ class Controller(object):
                         if dist_cm == 0:
                             dist_cm = 250
                         received_ping = True
-                        
+
                 except UnicodeDecodeError:
                     dist_cm = None
-            i +=1
+            i += 1
             pings.append(dist_cm)
             received_ping = False
             dist_cm = None
         return sum(pings)/len(pings)
 
-
     def look_direction(self, degrees):
         pass
-
-
-    def simple_navigation(self):
-        while True:
-            self.act('F', duration_s=2)
-
-            self.act('S', duration_s=0.1)
-
-            dist = self.act('P', duration_s=None)
-            print(f"Ping: {dist} cm")
-            if 0 < dist < self.min_safe_dist:
-                self.act('L', duration_s=1)
-
