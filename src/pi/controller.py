@@ -91,3 +91,35 @@ class Controller(object):
 
     def look_direction(self, degrees):
         pass
+
+    def detect_target(target='potted-plant', img, detector):
+        """Lets the robot look around and search for targets.
+
+        :param target: should be from the same set of labels as the pretrained net, defaults to 'potted-plant'
+        :type target: str
+        :param img: image to use for detection
+        :type img: array
+        :param detector: object detection object
+        :type detector: object
+        :return: True or False depending on succesful target detection
+        :rtype: bool
+        """
+        print("Looking around..")
+        detections = detector.detect(img)
+        print("Got readings..")
+        print(detections)
+        target_detected = False
+        for detection in detections:
+            if detection['label']==target:
+                target_detected = True
+                break
+        if target_detected:
+            print("Target detected!")
+            for _ in range(3):
+                controller.act('L7', duration_s=0.5)
+                controller.act('L5', duration_s=0.5)
+            controller.act('S0', duration_s=1)
+            return True
+        else:
+            print("Nothing of interest found.")
+            return False
